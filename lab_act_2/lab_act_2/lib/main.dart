@@ -4,7 +4,10 @@ void main() {
   runApp(
     MaterialApp(
       home: Scaffold(
-        body: Container(child: Center(child: Text("Hello World"))),
+        backgroundColor: Colors.blueAccent,
+        body: Container(
+          child: Center(child: Text("Hello World"))
+          ),
       ),
     ),
   );
