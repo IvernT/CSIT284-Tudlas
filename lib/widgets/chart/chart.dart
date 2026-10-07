@@ -33,7 +33,8 @@ class Chart extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDarkMode =
         MediaQuery.of(context).platformBrightness == Brightness.dark;
-    final safeMax = maxTotalExpense == 0 ? 1 : maxTotalExpense;
+    final hasSpending = maxTotalExpense > 0;
+    final safeMax = hasSpending ? maxTotalExpense : 1.0;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -42,9 +43,7 @@ class Chart extends StatelessWidget {
       height: 210,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
-        color: isDarkMode
-            ? const Color(0xFF111827)
-            : const Color(0xFFF8FBFF),
+        color: isDarkMode ? const Color(0xFF111827) : const Color(0xFFF8FBFF),
         border: Border.all(
           color: isDarkMode ? Colors.white12 : Colors.blue.shade100,
         ),
@@ -60,40 +59,61 @@ class Chart extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                for (final bucket in buckets)
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 5),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Expanded(
-                            child: Align(
-                              alignment: Alignment.bottomCenter,
-                              child: ChartBar(
-                                fill: bucket.totalExpenses == 0
-                                    ? 0
-                                    : bucket.totalExpenses / safeMax,
-                              ),
+            child: hasSpending
+                ? Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      for (final bucket in buckets)
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 3),
+                            child: Column(
+                              children: [
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    currencyFormatter
+                                        .format(bucket.totalExpenses),
+                                    style:
+                                        Theme.of(context).textTheme.labelSmall,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Expanded(
+                                  child: Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: ChartBar(
+                                      fill: bucket.totalExpenses / safeMax,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Icon(
+                                  categoryIcons[bucket.category],
+                                  size: 18,
+                                  color: isDarkMode
+                                      ? Theme.of(context).colorScheme.secondary
+                                      : Theme.of(context).colorScheme.primary,
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  '${bucket.category.name[0].toUpperCase()}${bucket.category.name.substring(1)}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.labelSmall,
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Icon(
-                            categoryIcons[bucket.category],
-                            size: 18,
-                            color: isDarkMode
-                                ? Theme.of(context).colorScheme.secondary
-                                : Theme.of(context).colorScheme.primary,
-                          ),
-                        ],
-                      ),
+                        ),
+                    ],
+                  )
+                : Center(
+                    child: Text(
+                      'No spending data yet',
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
-              ],
-            ),
           ),
         ],
       ),
